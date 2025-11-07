@@ -2,3 +2,6 @@
 .tox
 build
 *.egg-info
+.coverage
+coverage.lcov
+**/__pycache__

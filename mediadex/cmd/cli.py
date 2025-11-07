@@ -1,4 +1,4 @@
-#  Python CLI Template
+#  Mediadex Media Indexer
 #  Copyright (C) 2025  Joni Harker
 
 #  This program is free software: you can redistribute it and/or modify
@@ -19,8 +19,8 @@ import logging
 import pathlib
 
 
-from cli_template.app.worker import Worker
-from cli_template.app.config import Config
+from mediadex.app.worker import Worker
+from mediadex.config import Config
 
 from ruamel.yaml import YAML
 

@@ -1,4 +1,4 @@
-#  Python CLI Template
+#  Mediadex Media Indexer
 #  Copyright (C) 2025  Joni Harker
 
 #  This program is free software: you can redistribute it and/or modify
@@ -14,29 +14,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
+from mediadex.cmd.cli import CLI
 
 
-class Config:
-    def __init__(self):
-        self.log = logging.getLogger(__name__)
-
-        # default values
-        self.settings = {
-            "option1": "foo",
-            "option2": "bar",
-        }
-
-    def __str__(self):
-        return f"{self.settings}"
-
-    def read_dict(self, seed):
-        self.log.debug(f"Configuration seed data: {seed}")
-
-        if not seed:
-            return
-
-        for option in self.settings.keys():
-            if option in seed:
-                self.log.debug(f"Setting {option} to {seed[option]}")
-                self.settings[option] = seed[option]
+def main():
+    runner = CLI()
+    retval = runner.run()
+    return retval

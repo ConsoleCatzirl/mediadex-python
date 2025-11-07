@@ -1,8 +1,8 @@
 SHELL := /bin/bash
 
 
-PY_MODULE := cli_template
-PY_SCRIPT := .venv/bin/cli-template  # from 'console_scripts' in setup.cfg
+PY_MODULE := mediadex
+PY_SCRIPT := .venv/bin/mediadex  # from 'console_scripts' in setup.cfg
 PY_FILES  := $(shell find $(PY_MODULE) -type f -name '*.py')
 
 .PHONY: default
@@ -23,7 +23,7 @@ $(PY_SCRIPT): .venv requirements.txt pyproject.toml setup.cfg setup.py $(PY_FILE
 
 .PHONY: test
 test: .venv
-	.venv/bin/tox -e pep8	
+	.venv/bin/tox -e pep8,pytest
 
 
 .PHONY: update

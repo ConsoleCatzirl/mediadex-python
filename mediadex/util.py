@@ -1,4 +1,4 @@
-#  Python CLI Template
+#  Mediadex Media Indexer
 #  Copyright (C) 2025  Joni Harker
 
 #  This program is free software: you can redistribute it and/or modify
@@ -14,10 +14,33 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cli_template.cmd.cli import CLI
+import logging
 
 
-def main():
-    runner = CLI()
-    retval = runner.run()
-    return retval
+LOG = logging.getLogger(__name__)
+
+
+def merge_dict(main, update):
+    if not update:
+        return main
+
+    for key in main.keys():
+        if key not in update:
+            LOG.warning(f"Ignoring extra key: {key}")
+            continue
+
+        main_type = type(main[key])
+        update_type = type(update[key])
+
+        if main_type is not update_type:
+            LOG.warning(f"Type mismatch: {main_type} "
+                        f"is not {update_type}")
+            continue
+
+        if main_type is dict:
+            main[key] = merge_dict(main[key], update[key])
+
+        else:
+            main[key] = update[key]
+
+    return main

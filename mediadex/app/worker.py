@@ -1,4 +1,4 @@
-#  Python CLI Template
+#  Mediadex Media Indexer
 #  Copyright (C) 2025  Joni Harker
 
 #  This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,13 @@
 import logging
 
 
+LOG = logging.getLogger(__name__)
+
+
 class Worker:
     def __init__(self, config):
-        self.log = logging.getLogger(__name__)
-
-        self.log.debug(f"Worker configuration: {config}")
+        LOG.debug(f"Worker configuration: {config}")
         self.config = config
 
     def work(self):
-        self.log.info("Working")
+        LOG.info("Working")
