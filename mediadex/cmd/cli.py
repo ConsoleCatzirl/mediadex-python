@@ -19,7 +19,7 @@ import logging
 import pathlib
 
 
-from mediadex.app.worker import Worker
+from mediadex.worker import Worker
 from mediadex.config import Config
 
 from ruamel.yaml import YAML
@@ -65,7 +65,8 @@ class CLI:
         _path = pathlib.Path(path)
         yaml = reader.load(_path)
 
-        conf.read_dict(yaml)
+        conf.update(yaml)
+
         return conf
 
     def run(self):

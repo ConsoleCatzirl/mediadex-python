@@ -45,13 +45,15 @@ class Config:
         },
     }
 
-    def __init__(self):
+    def __init__(self, config={}):
         self.settings = copy.deepcopy(self.defaults)
+        if config:
+            self.update(config)
 
     def __str__(self):
         return f"{self.settings}"
 
-    def read_dict(self, config):
+    def update(self, config):
         LOG.debug(f"Configuration data: {config}")
 
         if not config:

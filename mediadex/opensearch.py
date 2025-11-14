@@ -20,10 +20,11 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-class Worker:
+class Client:
     def __init__(self, config):
-        LOG.debug(f"Worker configuration: {config}")
-        self.config = config
+        self.hosts = config["hosts"]
+        self.username = config["username"]
+        self.password = config["password"]
 
-    def work(self):
-        LOG.info("Working")
+        self._upstream_client = None
+        # connect to arangodb
