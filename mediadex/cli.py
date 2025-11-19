@@ -35,7 +35,7 @@ class CLI:
         parser.add_argument('-v', '--verbose',
                             action='count', dest='verbose',
                             help='Increase verbosity')
-        parser.add_argument('-c', '--config',
+        parser.add_argument('-c', '--config', required=True,
                             action='store', dest='config',
                             help='Path to config file')
         self.args = parser.parse_args()
@@ -54,10 +54,6 @@ class CLI:
 
     def read_config(self, path):
         conf = Config()
-
-        if not path:
-            self.log.debug("Default Configuration")
-            return conf
 
         self.log.debug("Reading Config")
 

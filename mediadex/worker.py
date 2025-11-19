@@ -47,6 +47,18 @@ class Worker:
                     self.config.settings["opensearch"]
                 )
 
+        if self.arangodb is None and self.opensearch is None:
+            LOG.error("No backend configured, aborting")
+            return
+
+        movies_paths = self.config.settings["paths"]["movies"]
+        music_paths = self.config.settings["paths"]["music"]
+        shows_paths = self.config.settings["paths"]["shows"]
+
+        if len(movies_paths) + len(music_paths) + len(shows_paths) == 0:
+            LOG.error("No media paths configured, aborting")
+            return
+
         for path in self.config.settings['paths']['movies']:
             self.walk_path(path, Family.MOVIES)
 
