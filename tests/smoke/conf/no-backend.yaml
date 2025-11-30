@@ -1,0 +1,8 @@
+paths:
+  movies:
+    - tests/smoke/media
+  music:
+    - tests/smoke/media
+  shows:
+    - tests/smoke/media
+

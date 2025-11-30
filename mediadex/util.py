@@ -25,22 +25,15 @@ def merge_dict(main, update):
         return main
 
     for key in main.keys():
+
+        # ignore keys that don't have an updated value
         if key not in update:
-            # no updated value
             continue
 
+        # recurse on dictionaries
         main_type = type(main[key])
-        update_type = type(update[key])
-
-        if main_type is not update_type:
-            if update_type is not type(None):
-                LOG.warning(f"Type mismatch: {update_type} "
-                            f"is not {main_type}")
-            continue
-
         if main_type is dict:
             main[key] = merge_dict(main[key], update[key])
-
         else:
             main[key] = update[key]
 

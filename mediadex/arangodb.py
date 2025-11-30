@@ -16,16 +16,80 @@
 
 import logging
 
+from arango import ArangoClient
+
+from mediadex.item import Family
+
 
 LOG = logging.getLogger(__name__)
 
 
 class Client:
     def __init__(self, config):
-        self.host = config["host"]
-        self.port = config["port"]
-        self.username = config["username"]
-        self.password = config["password"]
+        self.config = config
 
-        self._upstream_client = None
-        # connect to arangodb
+        self.upstream_client = None
+
+        self.database = None
+        self.collections = {
+            Family.MOVIES: None,
+            Family.MUSIC: None,
+            Family.SHOWS: None,
+        }
+
+    def connect(self):
+        '''
+        Connect to ArangoDB
+        '''
+        LOG.info("Connecting to ArangoDB")
+        self.upstream_client = ArangoClient(hosts=self.config["hosts"])
+
+        self.database = self.upstream_client.db(
+            self.config["database"],
+            username=self.config["username"],
+            password=self.config["password"],
+        )
+
+        if self.database.has_collection(Family.MOVIES):
+            self.collections[Family.MOVIES] = self.database.collection(Family.MOVIES)
+        else:
+            self.collections[Family.MOVIES] = self.database.create_collection(Family.MOVIES)
+
+        if self.database.has_collection(Family.MUSIC):
+            self.collections[Family.MUSIC] = self.database.collection(Family.MUSIC)
+        else:
+            self.collections[Family.MUSIC] = self.database.create_collection(Family.MUSIC)
+
+        if self.database.has_collection(Family.SHOWS):
+            self.collections[Family.SHOWS] = self.database.collection(Family.SHOWS)
+        else:
+            self.collections[Family.SHOWS] = self.database.create_collection(Family.SHOWS)
+
+    def index(self, it):
+        '''
+        Index an Item into ArangoDB
+        '''
+        # Connect to client, if needed
+        if self.upstream_client is None:
+            self.connect()
+
+        # check for existing entry
+        if self.collections[it.family].has(it.fingerprint):
+            LOG.debug(f"Skipping exsting document: {it.fingerprint}")
+            return
+
+        # create document to index
+        document = {
+            "_key": it.fingerprint,
+            "fileinfo": {
+                "fullpath": it.fullpath,
+                "basename": it.basename,
+                "basedir": it.basedir,
+                "checksum": it.fingerprint,
+            },
+            "mediainfo": it.mediainfo,
+        }
+
+        # insert document into collection
+        LOG.info(f"Indexing {it.fullpath} into ArangoDB")
+        self.collections[it.family].insert(document)

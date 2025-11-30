@@ -16,9 +16,40 @@
 
 import logging
 
+import chardet
+from pymediainfo import MediaInfo
 
 LOG = logging.getLogger(__name__)
 
 
 def generate(filepath):
-    return "dummy value"
+    mediainfo = None
+
+    try:
+        mediainfo = _generate(filepath)
+
+    except FileNotFoundError:
+        _enc = filepath.encode('utf-8', 'surrogateescape')
+        charset = chardet.detect(filepath).get('encoding')
+        LOG.info(f"chardet found: {charset}")
+
+        try:
+            _f = _enc.decode(charset)
+            mediainfo = _generate(_f)
+        except FileNotFoundError:
+            LOG.warning(f"chardet failure: {_f}")
+
+    except Exception as exc:
+        LOG.warning(str(exc))
+
+    finally:
+        if not mediainfo:
+            _f = filepath.encode('utf-8', 'surrogateescape')
+            raise IOError(f"Could not open {_f}")
+
+    return mediainfo
+
+
+def _generate(filepath):
+    info = MediaInfo.parse(filepath)
+    return info.to_data()

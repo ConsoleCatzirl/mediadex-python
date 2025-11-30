@@ -18,11 +18,17 @@ import argparse
 import logging
 import pathlib
 
-
+from mediadex.exc import BackendException, ConfigException
 from mediadex.worker import Worker
 from mediadex.config import Config
 
 from ruamel.yaml import YAML
+
+
+EXIT_SUCCESS = 0
+EXIT_CONFIG_ERR = 1
+EXIT_BACKEND_ERR = 2
+EXIT_UNKNOWN_ERR = -1
 
 
 class CLI:
@@ -48,6 +54,9 @@ class CLI:
         fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         sh.setFormatter(logging.Formatter(fmt))
         root_log.addHandler(sh)
+
+        url_log = logging.getLogger("urllib3")
+        url_log.setLevel(logging.WARNING)
 
         self.log = logging.getLogger(__name__)
         self.log.setLevel(level)
@@ -82,18 +91,24 @@ class CLI:
             config = self.read_config(self.args.config)
             if config is None:
                 self.log.error("Failed to load config file")
-                return 1
+                return EXIT_CONFIG_ERR
         except Exception as exc:
             self.log.exception(f"Failed to read config file: {exc}")
-            return 1
+            return EXIT_CONFIG_ERR
 
         # Run Worker
         try:
             worker = Worker(config)
             worker.work()
+        except BackendException as exc:
+            self.log.exception(f"Backend error: {exc}")
+            return EXIT_BACKEND_ERR
+        except ConfigException as exc:
+            self.log.exception(f"Configuration error: {exc}")
+            return EXIT_CONFIG_ERR
         except Exception as exc:
             self.log.exception(f"Worker failed: {exc}")
-            return 2
+            return EXIT_UNKNOWN_ERR
 
         # Clean exit
-        return 0
+        return EXIT_SUCCESS

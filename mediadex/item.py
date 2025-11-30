@@ -16,34 +16,47 @@
 
 import logging
 
-from enum import Enum
-
 from mediadex import fingerprint, mediainfo
 
 
 LOG = logging.getLogger(__name__)
 
 
-class Family(Enum):
+class Family:
     MOVIES = "movies"
     MUSIC = "music"
     SHOWS = "shows"
 
 
 class Item:
-    def __init__(self, family, filename):
+    def __init__(self, family, fullpath, basename, basedir):
         self.family = family
-        self.filename = filename
+        self.fullpath = fullpath
+        self.basename = basename
+        self.basedir = basedir
 
         self._fingerprint = None
         self._mediainfo = None
 
-    def get_fingerprint(self):
+    @property
+    def fingerprint(self):
         if self._fingerprint is None:
-            self._fingerprint = fingerprint.generate(self.filename)
+            self._fingerprint = fingerprint.generate(self.fullpath)
         return self._fingerprint
 
-    def get_mediainfo(self):
+    @property
+    def mediainfo(self):
         if self._mediainfo is None:
-            self._mediainfo = mediainfo.generate(self.filename)
+            self._mediainfo = mediainfo.generate(self.fullpath)
         return self._mediainfo
+
+    @property
+    def document(self):
+        return {
+            "family": str(self.family),
+            "fullpath": self.fullpath,
+            "basename": self.basename,
+            "basedir": self.basedir,
+            "fingerprint": self.fingerprint,
+            "mediainfo": self.mediainfo,
+        }

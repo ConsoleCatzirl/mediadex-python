@@ -32,16 +32,17 @@ class Config:
             "music": [],
             "shows": [],
         },
+        "arangodb": {
+            "hosts": [],
+            "username": None,
+            "password": None,
+            "database": "mediadex",
+        },
         "opensearch": {
             "hosts": [],
             "username": None,
             "password": None,
-        },
-        "arangodb": {
-            "host": None,
-            "port": None,
-            "username": None,
-            "password": None,
+            "cluster": "mediadex",
         },
     }
 
@@ -51,7 +52,10 @@ class Config:
             self.update(config)
 
     def __str__(self):
-        return f"{self.settings}"
+        sanitized = copy.deepcopy(self.settings)
+        del sanitized["arangodb"]["password"]
+        del sanitized["opensearch"]["password"]
+        return f"{sanitized}"
 
     def update(self, config):
         LOG.debug(f"Configuration data: {config}")

@@ -14,32 +14,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
+
+class BackendException(BaseException):
+    pass
 
 
-LOG = logging.getLogger(__name__)
+class ConfigException(BaseException):
+    pass
 
 
-class Client:
-    def __init__(self, config):
-        self.hosts = config["hosts"]
-        self.username = config["username"]
-        self.password = config["password"]
-
-        self._upstream_client = None
-
-    def connect(self):
-        '''
-        Connect to OpenSearch
-        '''
-        LOG.info("Connecting to OpenSearch")
-        self._upstream_client = "foo"
-
-    def index(self, it):
-        '''
-        Index an Item into OpenSearch
-        '''
-        LOG.info(f"Indexing {it.filename} into OpenSearch")
-
-        if self._upstream_client is None:
-            self.connect()
+class SystemException(BaseException):
+    pass

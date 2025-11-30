@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import hashlib
 import logging
 
 
@@ -21,4 +22,29 @@ LOG = logging.getLogger(__name__)
 
 
 def generate(filepath):
-    return "dummy value"
+    fingerprint = None
+    with open(filepath, 'rb') as f:
+        fingerprint = _generate(f)
+        LOG.debug(f"Fingerprint for {filepath}: {fingerprint}")
+    return fingerprint
+
+
+def _generate(filelike):
+    # Magic numbers for file chunking
+    chunk_size = 24576
+    chunk_count = 128
+
+    hasher = hashlib.sha384()
+
+    try:
+        for _ in range(chunk_count):
+            chunk = filelike.read(chunk_size)
+            if chunk:
+                hasher.update(chunk)
+    except Exception as exc:
+        if LOG.isEnabledFor(logging.INFO):
+            LOG.exception(exc)
+        else:
+            LOG.warn(str(exc))
+
+    return hasher.hexdigest()

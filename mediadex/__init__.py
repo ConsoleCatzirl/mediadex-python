@@ -14,10 +14,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import sys
+
 from mediadex.cli import CLI
 
 
 def main():
     runner = CLI()
     retval = runner.run()
-    return retval
+    sys.exit(retval)

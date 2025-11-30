@@ -1,13 +1,8 @@
-import json
-
-import pytest
-
-from mediadex.config import Config
 from mediadex.worker import Worker
 
 
-def test_worker_work(mocker):
-    mock_worker = Worker(Config())
+def test_worker_work(mocker, fake_config):
+    mock_worker = Worker(fake_config)
     mock_worker.walk_path = mocker.MagicMock()
 
     mock_worker.work()

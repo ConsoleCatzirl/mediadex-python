@@ -1,0 +1,8 @@
+arangodb:
+  hosts:
+    - "http://localhost:8259"
+
+opensearch:
+  hosts:
+    - "https://localhost:9200"
+

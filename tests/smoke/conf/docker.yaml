@@ -1,0 +1,15 @@
+paths:
+  movies:
+    - tests/smoke/media
+  music:
+    - tests/smoke/media
+  shows:
+    - tests/smoke/media
+
+arangodb:
+  hosts:
+    - "http://localhost:8259"
+
+opensearch:
+  hosts:
+    - "https://localhost:9200"
