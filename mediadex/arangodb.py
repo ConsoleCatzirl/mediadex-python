@@ -50,20 +50,29 @@ class Client:
             password=self.config["password"],
         )
 
-        if self.database.has_collection(Family.MOVIES):
-            self.collections[Family.MOVIES] = self.database.collection(Family.MOVIES)
+        if self.config["collection_prefix"]:
+            movies_collection = f"{self.config['collection_prefix']}-{Family.MOVIES}"
+            music_collection = f"{self.config['collection_prefix']}-{Family.MUSIC}"
+            shows_collection = f"{self.config['collection_prefix']}-{Family.SHOWS}"
         else:
-            self.collections[Family.MOVIES] = self.database.create_collection(Family.MOVIES)
+            movies_collection = Family.MOVIES
+            music_collection = Family.MUSIC
+            shows_collection = Family.SHOWS
 
-        if self.database.has_collection(Family.MUSIC):
-            self.collections[Family.MUSIC] = self.database.collection(Family.MUSIC)
+        if self.database.has_collection(movies_collection):
+            self.collections[Family.MOVIES] = self.database.collection(movies_collection)
         else:
-            self.collections[Family.MUSIC] = self.database.create_collection(Family.MUSIC)
+            self.collections[Family.MOVIES] = self.database.create_collection(movies_collection)
 
-        if self.database.has_collection(Family.SHOWS):
-            self.collections[Family.SHOWS] = self.database.collection(Family.SHOWS)
+        if self.database.has_collection(music_collection):
+            self.collections[Family.MUSIC] = self.database.collection(music_collection)
         else:
-            self.collections[Family.SHOWS] = self.database.create_collection(Family.SHOWS)
+            self.collections[Family.MUSIC] = self.database.create_collection(music_collection)
+
+        if self.database.has_collection(shows_collection):
+            self.collections[Family.SHOWS] = self.database.collection(shows_collection)
+        else:
+            self.collections[Family.SHOWS] = self.database.create_collection(shows_collection)
 
     def index(self, it):
         '''
@@ -78,18 +87,8 @@ class Client:
             LOG.debug(f"Skipping exsting document: {it.fingerprint}")
             return
 
-        # create document to index
-        document = {
-            "_key": it.fingerprint,
-            "fileinfo": {
-                "fullpath": it.fullpath,
-                "basename": it.basename,
-                "basedir": it.basedir,
-                "checksum": it.fingerprint,
-            },
-            "mediainfo": it.mediainfo,
-        }
-
         # insert document into collection
         LOG.info(f"Indexing {it.fullpath} into ArangoDB")
+        document = it.document
+        document["_key"] = it.fingerprint
         self.collections[it.family].insert(document)

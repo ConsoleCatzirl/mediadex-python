@@ -37,12 +37,15 @@ class Config:
             "username": None,
             "password": None,
             "database": "mediadex",
+            "collection_prefix": None,
         },
         "opensearch": {
             "hosts": [],
             "username": None,
             "password": None,
+            "insecure": False,
             "cluster": "mediadex",
+            "index_prefix": None,
         },
     }
 

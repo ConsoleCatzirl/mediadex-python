@@ -94,6 +94,9 @@ class Worker:
 
                 it = Item(family, fullname, file, path)
 
+                if not it.is_regular:
+                    continue
+
                 try:
                     if self.arangodb:
                         # LOG.debug(f"Indexing {fullname} into ArangoDB")

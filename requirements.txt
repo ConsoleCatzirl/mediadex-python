@@ -1,4 +1,5 @@
 chardet
+opensearch-py
 python-arango
 pymediainfo
 ruamel.yaml

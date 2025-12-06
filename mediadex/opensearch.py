@@ -16,30 +16,67 @@
 
 import logging
 
+from mediadex.item import Family
+
+from opensearchpy import OpenSearch
 
 LOG = logging.getLogger(__name__)
 
 
 class Client:
     def __init__(self, config):
-        self.hosts = config["hosts"]
-        self.username = config["username"]
-        self.password = config["password"]
+        self.config = config
 
-        self._upstream_client = None
+        self.upstream_client = None
+
+        self.indices = {
+            Family.MOVIES: None,
+            Family.MUSIC: None,
+            Family.SHOWS: None,
+        }
 
     def connect(self):
         '''
         Connect to OpenSearch
         '''
         LOG.info("Connecting to OpenSearch")
-        self._upstream_client = "foo"
+        self.upstream_client = OpenSearch(
+            hosts=self.config["hosts"],
+            verify_certs=self.config["insecure"],
+            http_auth=(
+                self.config["username"],
+                self.config["password"],
+            ),
+        )
+
+        if self.config["index_prefix"]:
+            self.indices[Family.MOVIES] = f"{self.config['index_prefix']}-{Family.MOVIES}"
+            self.indices[Family.MUSIC] = f"{self.config['index_prefix']}-{Family.MUSIC}"
+            self.indices[Family.SHOWS] = f"{self.config['index_prefix']}-{Family.SHOWS}"
+        else:
+            self.indices[Family.MOVIES] = Family.MOVIES
+            self.indices[Family.MUSIC] = Family.MUSIC
+            self.indices[Family.SHOWS] = Family.SHOWS
+
+        if not self.upstream_client.indices.exists(self.indices[Family.MOVIES]):
+            self.upstream_client.indices.create(self.indices[Family.MOVIES])
+
+        if not self.upstream_client.indices.exists(self.indices[Family.MUSIC]):
+            self.upstream_client.indices.create(self.indices[Family.MUSIC])
+
+        if not self.upstream_client.indices.exists(self.indices[Family.SHOWS]):
+            self.upstream_client.indices.create(self.indices[Family.SHOWS])
 
     def index(self, it):
         '''
         Index an Item into OpenSearch
         '''
-        LOG.info(f"Indexing {it.filename} into OpenSearch")
-
-        if self._upstream_client is None:
+        if self.upstream_client is None:
             self.connect()
+
+        if self.upstream_client.exists(index=self.indices[it.family], id=it.fingerprint):
+            LOG.debug(f"Skipping exsting document: {it.fingerprint}")
+            return
+
+        LOG.info(f"Indexing {it.fullpath} into OpenSearch")
+        self.upstream_client.create(index=self.indices[it.family], id=it.fingerprint, body=it.document)

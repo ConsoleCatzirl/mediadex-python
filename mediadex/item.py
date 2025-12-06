@@ -15,6 +15,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import os
+import stat
 
 from mediadex import fingerprint, mediainfo
 
@@ -35,8 +37,21 @@ class Item:
         self.basename = basename
         self.basedir = basedir
 
+        self._filestat = None
         self._fingerprint = None
         self._mediainfo = None
+
+    @property
+    def filesize(self):
+        if self._filestat is None:
+            self._filestat = os.lstat(self.fullpath)
+        return self._filestat.st_size
+
+    @property
+    def is_regular(self):
+        if self._filestat is None:
+            self._filestat = os.lstat(self.fullpath)
+        return stat.S_ISREG(self._filestat.st_mode)
 
     @property
     def fingerprint(self):
@@ -53,10 +68,12 @@ class Item:
     @property
     def document(self):
         return {
-            "family": str(self.family),
-            "fullpath": self.fullpath,
-            "basename": self.basename,
-            "basedir": self.basedir,
-            "fingerprint": self.fingerprint,
+            "fileinfo": {
+                "filesize": self.filesize,
+                "fullpath": self.fullpath,
+                "basename": self.basename,
+                "basedir": self.basedir,
+                "checksum": self.fingerprint,
+            },
             "mediainfo": self.mediainfo,
         }
