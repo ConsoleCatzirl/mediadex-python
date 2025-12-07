@@ -83,12 +83,24 @@ class Client:
             self.connect()
 
         # check for existing entry
-        if self.collections[it.family].has(it.fingerprint):
-            LOG.debug(f"Skipping exsting document: {it.fingerprint}")
-            return
+        exists = self.collections[it.family].has(it.fingerprint)
+        if exists:
+            if self.config["force"]:
+                LOG.debug(f"Forcing re-indexing document: {it.fingerprint}")
+            else:
+                LOG.debug(f"Skipping exsting document: {it.fingerprint}")
+                return
 
         # insert document into collection
-        LOG.info(f"Indexing {it.fullpath} into ArangoDB")
         document = it.document
         document["_key"] = it.fingerprint
-        self.collections[it.family].insert(document)
+
+        if self.config["dryrun"]:
+            LOG.debug(f"Dry run, not indexing {it.fullpath}")
+        else:
+            if exists:
+                LOG.info(f"Updating {it.fullpath} into ArangoDB")
+                self.collections[it.family].update(document)
+            else:
+                LOG.info(f"Indexing {it.fullpath} into ArangoDB")
+                self.collections[it.family].insert(document)

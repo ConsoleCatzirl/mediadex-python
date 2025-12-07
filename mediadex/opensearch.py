@@ -42,7 +42,7 @@ class Client:
         LOG.info("Connecting to OpenSearch")
         self.upstream_client = OpenSearch(
             hosts=self.config["hosts"],
-            verify_certs=self.config["insecure"],
+            verify_certs=self.config["secure"],
             http_auth=(
                 self.config["username"],
                 self.config["password"],
@@ -74,9 +74,20 @@ class Client:
         if self.upstream_client is None:
             self.connect()
 
-        if self.upstream_client.exists(index=self.indices[it.family], id=it.fingerprint):
-            LOG.debug(f"Skipping exsting document: {it.fingerprint}")
-            return
+        exists = self.upstream_client.exists(index=self.indices[it.family], id=it.fingerprint)
+        if exists:
+            if self.config["force"]:
+                LOG.debug(f"Forcing re-indexing: {it.fingerprint}")
+            else:
+                LOG.debug(f"Skipping exsting document: {it.fingerprint}")
+                return
 
-        LOG.info(f"Indexing {it.fullpath} into OpenSearch")
-        self.upstream_client.create(index=self.indices[it.family], id=it.fingerprint, body=it.document)
+        if self.config["dryrun"]:
+            LOG.debug(f"Dry run, not indexing {it.fullpath}")
+        else:
+            if exists:
+                LOG.info(f"Updating {it.fullpath} into OpenSearch")
+                self.upstream_client.update(index=self.indices[it.family], id=it.fingerprint, body=it.document)
+            else:
+                LOG.info(f"Indexing {it.fullpath} into OpenSearch")
+                self.upstream_client.create(index=self.indices[it.family], id=it.fingerprint, body=it.document)

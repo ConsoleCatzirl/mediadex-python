@@ -38,14 +38,18 @@ class Config:
             "password": None,
             "database": "mediadex",
             "collection_prefix": None,
+            "force": False,
+            "dryrun": False,
         },
         "opensearch": {
             "hosts": [],
             "username": None,
             "password": None,
-            "insecure": False,
+            "secure": True,
             "cluster": "mediadex",
             "index_prefix": None,
+            "force": False,
+            "dryrun": False,
         },
     }
 
